@@ -101,7 +101,9 @@ public class MainActivity extends AppCompatActivity {
 
                 //create groupId
                 String groupId = groupDatabase.push().getKey();
-                Group newGroup = new Group( groupId, mAuth.getCurrentUser().getUid(), groupName.getText().toString());
+                Group newGroup = new Group( groupId,
+                        mAuth.getCurrentUser().getUid(),
+                        new Miscellaneous().replaceWhiteSpace(groupName.getText().toString()));
                 groupDatabase.child("Group").child(groupId).setValue(newGroup).addOnCompleteListener(MainActivity.this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -133,10 +135,28 @@ public class MainActivity extends AppCompatActivity {
     //Add currGroup to user's info
     private void addCurrGroupToUser(String groupId) {
         DatabaseReference userDatabase = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference groupRef = userDatabase.child("User");
+        DatabaseReference groupRef = userDatabase.child("User").child(mAuth.getCurrentUser().getUid()).child("Groups");
         ArrayList<String> currGroupId = new ArrayList<>();
         currGroupId.add(groupId);
-        groupRef.child(mAuth.getCurrentUser().getUid()).child("Groups").setValue(currGroupId);
+
+        //Check for other group ids and add them to arraylist
+        ValueEventListener valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot ds: snapshot.getChildren()) {
+                    String groupId = ds.getValue(String.class);
+                    currGroupId.add(groupId);
+                }
+                groupRef.setValue(currGroupId);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.d("Error", error.getMessage());
+            }
+        };
+
+        groupRef.addListenerForSingleValueEvent(valueEventListener);
     }
 
     //Remove Later, for testing purpose only until sign out button is added.

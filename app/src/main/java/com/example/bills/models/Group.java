@@ -5,6 +5,7 @@ public class Group {
     private String groupId;
     private String adminId;
     private String groupName;
+    private String[] participants;
 
     public Group(String groupId, String adminId, String groupName) {
         this.groupId = groupId;
@@ -36,4 +37,11 @@ public class Group {
         this.groupName = groupName;
     }
 
+    public String[] getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(String[] participants) {
+        this.participants = participants;
+    }
 }

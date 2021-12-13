@@ -11,4 +11,14 @@ public class Miscellaneous {
         return true;
     }
 
+    public String replaceWhiteSpace(String word) {
+        String newString = word.replaceAll(" ", "%");
+        return newString;
+    }
+
+    public String replacePercentage(String word) {
+        String newString = word.replaceAll("%", " ");
+        return newString;
+    }
+
 }
