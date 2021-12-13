@@ -5,6 +5,7 @@
     <item
         android:id="@+id/add_group_btn"
         android:icon="@android:drawable/ic_menu_add"
+        android:onClick="addGroupClicked"
         android:title="Add Group"
         app:showAsAction="always" />
 </menu>

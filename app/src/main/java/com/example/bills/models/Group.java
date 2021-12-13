@@ -1,5 +1,6 @@
 package com.example.bills.models;
 
+
 public class Group {
     private String groupId;
     private String adminId;
@@ -34,4 +35,5 @@ public class Group {
     public void setGroupName(String groupName) {
         this.groupName = groupName;
     }
+
 }
