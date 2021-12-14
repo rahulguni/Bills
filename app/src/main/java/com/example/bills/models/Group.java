@@ -1,11 +1,17 @@
 package com.example.bills.models;
 
 
+import java.util.Arrays;
+
 public class Group {
     private String groupId;
     private String adminId;
     private String groupName;
     private String[] participants;
+
+    public Group() {
+
+    }
 
     public Group(String groupId, String adminId, String groupName) {
         this.groupId = groupId;
@@ -43,5 +49,14 @@ public class Group {
 
     public void setParticipants(String[] participants) {
         this.participants = participants;
+    }
+
+    @Override
+    public String toString() {
+        return "{groupId='" + groupId + '\'' +
+                ", adminId='" + adminId + '\'' +
+                ", groupName='" + groupName + '\'' +
+                ", participants=" + Arrays.toString(participants) +
+                '}';
     }
 }

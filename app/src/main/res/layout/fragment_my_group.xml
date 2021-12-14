@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#8F7878"
+    tools:context=".ui.home.MyGroupFragment">
+
+    <Button
+        android:id="@+id/confirm_bill_upload"
+        android:layout_width="215dp"
+        android:layout_height="53dp"
+        android:layout_marginStart="98dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="98dp"
+        android:text="Confirm"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/bill_image" />
+
+    <Button
+        android:id="@+id/view_bills"
+        android:layout_width="215dp"
+        android:layout_height="53dp"
+        android:layout_marginStart="98dp"
+        android:layout_marginEnd="98dp"
+        android:text="View All Bills"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/confirm_bill_upload" />
+
+    <ImageView
+        android:id="@+id/bill_image"
+        android:layout_width="345dp"
+        android:layout_height="452dp"
+        android:contentDescription="TODO"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@tools:sample/avatars" />
+</androidx.constraintlayout.widget.ConstraintLayout>

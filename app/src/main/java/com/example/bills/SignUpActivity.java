@@ -63,7 +63,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 User curr = new User(user.getUid(), currFirstName, currLastName, currEmail, currPhone);
                                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                                 DatabaseReference userTable = database.getReference("User");
-                                userTable.child(user.getUid()).setValue(curr).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<Void>() {
+                                userTable.child(curr.getPhone()).setValue(curr).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if(task.isSuccessful()) {
