@@ -43,7 +43,7 @@ public class DashboardFragment extends Fragment {
     private FirebaseAuth mAuth;
     TextView fullName, email, phone;
     Button allGroups, signOut;
-    JSONObject userJSON = new JSONObject();
+    private JSONObject userJSON = new JSONObject();
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -71,8 +71,8 @@ public class DashboardFragment extends Fragment {
         });
     }
 
-    private void checkProfile() {
-        userDatabase.child("User").child(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+    private void getProfile(String currPhone) {
+        userDatabase.child("User").child(currPhone).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DataSnapshot> task) {
                 if (!task.isSuccessful()) {
@@ -88,6 +88,21 @@ public class DashboardFragment extends Fragment {
                         e.printStackTrace();
                     }
 
+                }
+            }
+        });
+    }
+
+    private void checkProfile() {
+        userDatabase.child("UserDirectory").child(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if(!task.isSuccessful()) {
+                    Log.e("firebase", "Error getting data", task.getException());
+                }
+                else {
+                    String phone = String.valueOf(task.getResult().getValue());
+                    getProfile(phone);
                 }
             }
         });

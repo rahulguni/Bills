@@ -53,16 +53,18 @@ import java.util.ArrayList;
 public class HomeFragment extends Fragment implements GroupCustomAdapter.OnGroupListener {
 
     private FragmentHomeBinding binding;
-    GroupCustomAdapter adapter;
-    RecyclerView recyclerView;
-    Boolean hideAddGroupBtn = false;
+    private GroupCustomAdapter adapter;
+    private RecyclerView recyclerView;
+    private Boolean hideAddGroupBtn = false;
+    private String currUserPhone;
 
     //check user active groups
-    ArrayList<Group> currGroups;
+    private ArrayList<Group> currGroups;
     TextView noGroupText;
-    FirebaseAuth mAuth;
-    JSONObject user;
-    JSONArray groups = new JSONArray();
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private JSONObject user;
+    private JSONArray groups = new JSONArray();
+    private Miscellaneous misc = new Miscellaneous();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,7 +99,7 @@ public class HomeFragment extends Fragment implements GroupCustomAdapter.OnGroup
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         DividerItemDecoration itemDecoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(itemDecoration);
-        checkGroups();
+        checkProfile();
     }
 
     @Override
@@ -112,15 +114,32 @@ public class HomeFragment extends Fragment implements GroupCustomAdapter.OnGroup
         }
     }
 
+    private void checkProfile() {
+        DatabaseReference userDatabase = FirebaseDatabase.getInstance().getReference();
+        userDatabase.child("UserDirectory").child(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if(!task.isSuccessful()) {
+                    Log.e("firebase", "Error getting data", task.getException());
+                }
+                else {
+                    String phone = String.valueOf(task.getResult().getValue());
+                    currUserPhone = phone;
+                    checkGroups(phone);
+                }
+            }
+        });
+    }
 
-    private void checkGroups() {
+
+    private void checkGroups(String phone) {
 
         //Check user's groups to load up all groups in home page
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currUser = mAuth.getCurrentUser();
         if(currUser != null) {
             DatabaseReference usersTable = FirebaseDatabase.getInstance().getReference();
-            usersTable.child("User").child(currUser.getUid()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            usersTable.child("User").child(phone).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DataSnapshot> task) {
                     if (!task.isSuccessful()) {
@@ -170,9 +189,12 @@ public class HomeFragment extends Fragment implements GroupCustomAdapter.OnGroup
                         //Extract data, append to array and reload recycler view
                         try {
                             JSONObject newGroup = new JSONObject(String.valueOf(task.getResult().getValue()));
-                            currGroups.add(new Group(newGroup.get("groupId").toString(),
+                            JSONArray participants = new JSONArray(newGroup.getJSONArray("Participants").toString());
+                            Group currGroup = new Group(newGroup.get("groupId").toString(),
                                     newGroup.get("adminId").toString(),
-                                    new Miscellaneous().replacePercentage(newGroup.get("groupName").toString())));
+                                    misc.replacePercentage(newGroup.get("groupName").toString()));
+                            currGroup.setParticipants(participants);
+                            currGroups.add(0, currGroup);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -189,7 +211,7 @@ public class HomeFragment extends Fragment implements GroupCustomAdapter.OnGroup
 
     public void addGroupClicked() {
         AlertDialog.Builder addGroupAlert = new AlertDialog.Builder(getContext());
-        addGroupAlert.setMessage("Enter the name for your group:");
+        addGroupAlert.setTitle("Enter the name for your group:");
         addGroupAlert.setCancelable(true);
 
         //set up input
@@ -207,16 +229,19 @@ public class HomeFragment extends Fragment implements GroupCustomAdapter.OnGroup
                 String groupId = groupDatabase.push().getKey();
                 Group newGroup = new Group( groupId,
                         mAuth.getCurrentUser().getUid(),
-                        new Miscellaneous().replaceWhiteSpace(groupName.getText().toString()));
+                        misc.replaceWhiteSpace(groupName.getText().toString().trim()));
                 groupDatabase.child("Group").child(groupId).setValue(newGroup).addOnCompleteListener(getActivity(), new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if(task.isSuccessful()) {
                             Toast.makeText(getContext(), "Congratulations on making a new group! Start dividing bills now.",
                                     Toast.LENGTH_SHORT).show();
-                            addCurrGroupToUser(groupId);
+                            misc.addCurrGroupToUser(currUserPhone, groupId);
+                            misc.addCurrUserToGroup(groupId, currUserPhone);
                             //Add group to the recyclerview
-                            currGroups.add(0, new Group(groupId, mAuth.getCurrentUser().getUid(), groupName.getText().toString()));
+                            Group newGroup = new Group(groupId, mAuth.getCurrentUser().getUid(), groupName.getText().toString());
+                            newGroup.setParticipantsForInitial(currUserPhone);
+                            currGroups.add(0, newGroup);
                             fixUI(true);
                             adapter.notifyDataSetChanged();
                         }
@@ -238,33 +263,6 @@ public class HomeFragment extends Fragment implements GroupCustomAdapter.OnGroup
 
         AlertDialog alertDialog = addGroupAlert.create();
         alertDialog.show();
-    }
-
-    //Add currGroup to user's info
-    private void addCurrGroupToUser(String groupId) {
-        DatabaseReference userDatabase = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference groupRef = userDatabase.child("User").child(mAuth.getCurrentUser().getUid()).child("Groups");
-        ArrayList<String> currGroupId = new ArrayList<>();
-        currGroupId.add(groupId);
-
-        //Check for other group ids and add them to arraylist
-        ValueEventListener valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot ds: snapshot.getChildren()) {
-                    String groupId = ds.getValue(String.class);
-                    currGroupId.add(groupId);
-                }
-                groupRef.setValue(currGroupId);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.d("Error", error.getMessage());
-            }
-        };
-
-        groupRef.addListenerForSingleValueEvent(valueEventListener);
     }
 
     @Override

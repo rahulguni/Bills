@@ -67,6 +67,7 @@ public class SignUpActivity extends AppCompatActivity {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if(task.isSuccessful()) {
+                                            setPhoneInDirectoryDb(curr);
                                             Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                                             startActivity(intent);
                                             finish();
@@ -93,6 +94,10 @@ public class SignUpActivity extends AppCompatActivity {
         }
     }
 
+    private void setPhoneInDirectoryDb(User user) {
+        DatabaseReference directoryTable = FirebaseDatabase.getInstance().getReference("UserDirectory");
+        directoryTable.child(user.getUserId()).setValue(user.getPhone());
+    }
 
 
 }

@@ -1,13 +1,19 @@
 package com.example.bills.models;
 
 
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Group {
     private String groupId;
     private String adminId;
     private String groupName;
-    private String[] participants;
+    private ArrayList<String> participants = new ArrayList<>();
 
     public Group() {
 
@@ -43,12 +49,18 @@ public class Group {
         this.groupName = groupName;
     }
 
-    public String[] getParticipants() {
+    public ArrayList<String> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(String[] participants) {
-        this.participants = participants;
+    public void setParticipants(JSONArray participantsJSON) throws JSONException {
+        for(int i = 0; i < participantsJSON.length(); i++) {
+            this.participants.add(participantsJSON.get(i).toString());
+        }
+    }
+
+    public void setParticipantsForInitial(String number) {
+        this.participants.add(number);
     }
 
     @Override
@@ -56,7 +68,7 @@ public class Group {
         return "{groupId='" + groupId + '\'' +
                 ", adminId='" + adminId + '\'' +
                 ", groupName='" + groupName + '\'' +
-                ", participants=" + Arrays.toString(participants) +
+                ", participants=" + Arrays.toString(participants.toArray()) +
                 '}';
     }
 }
