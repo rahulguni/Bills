@@ -1,16 +1,15 @@
-package com.example.bills;
+package com.example.bills.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.bills.R;
 import com.example.bills.models.Group;
 
 import java.util.ArrayList;
@@ -18,17 +17,19 @@ import java.util.ArrayList;
 public class RequestsCustomAdapter extends RecyclerView.Adapter<RequestsCustomAdapter.RecyclerViewHolder>{
     Context parentContext;
     ArrayList<Group> allRequests;
+    private GroupCustomAdapter.OnGroupListener onGroupListener;
 
-    public RequestsCustomAdapter(Context parentContext, ArrayList<Group> allRequests) {
+    public RequestsCustomAdapter(Context parentContext, ArrayList<Group> allRequests, GroupCustomAdapter.OnGroupListener onGroupListener) {
         this.parentContext = parentContext;
         this.allRequests = allRequests;
+        this.onGroupListener = onGroupListener;
     }
 
     @NonNull
     @Override
     public RecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parentContext).inflate(R.layout.requests_recyclerview_adapter, parent, false);
-        RecyclerViewHolder recyclerViewHolder = new RecyclerViewHolder(view);
+        RecyclerViewHolder recyclerViewHolder = new RecyclerViewHolder(view, onGroupListener);
         return recyclerViewHolder;
     }
 
@@ -44,20 +45,23 @@ public class RequestsCustomAdapter extends RecyclerView.Adapter<RequestsCustomAd
         return this.allRequests.size();
     }
 
-    public class RecyclerViewHolder extends RecyclerView.ViewHolder {
+    public class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView groupName, sender, peopleNumber;
+        GroupCustomAdapter.OnGroupListener onGroupListener;
 
-        public RecyclerViewHolder(@NonNull View itemView) {
+        public RecyclerViewHolder(@NonNull View itemView, GroupCustomAdapter.OnGroupListener onGroupListener) {
             super(itemView);
             this.groupName = itemView.findViewById(R.id.requests_group_name);
             this.sender = itemView.findViewById(R.id.requests_sender);
             this.peopleNumber = itemView.findViewById(R.id.people_number_in_group);
+            this.onGroupListener = onGroupListener;
+            itemView.setOnClickListener(this);
         }
 
-    }
-
-    private void confirmRequest(){
-
+        @Override
+        public void onClick(View view) {
+            onGroupListener.onGroupClick(getAdapterPosition());
+        }
     }
 
 }

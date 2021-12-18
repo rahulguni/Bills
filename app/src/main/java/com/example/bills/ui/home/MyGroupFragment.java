@@ -2,6 +2,7 @@ package com.example.bills.ui.home;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,16 +16,21 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.bills.MainActivity;
-import com.example.bills.Miscellaneous;
+import com.example.bills.activities.BillItemsActivity;
+import com.example.bills.misc.Miscellaneous;
 import com.example.bills.R;
 import com.example.bills.databinding.FragmentHomeBinding;
+import com.example.bills.models.Bill;
 import com.example.bills.models.Group;
+import com.example.bills.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -41,21 +47,49 @@ import java.util.ArrayList;
 public class MyGroupFragment extends Fragment {
 
     private FragmentHomeBinding binding;
+    private Bill currBill;
     private Group currGroup;
+    private ArrayList<User> allUsers = new ArrayList<>();
+    Button confirmBill;
+    Miscellaneous misc = new Miscellaneous();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        currGroup = getDataFromBundle(this.getArguments());
+        currGroup = misc.getGroupDataFromBundle(this.getArguments());
+        getUserNames();
         setHasOptionsMenu(true);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(currGroup.getGroupName());
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_my_group, container, false);
+        View fragmentView = inflater.inflate(R.layout.fragment_my_group, container, false);
+        fragmentView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return true;
+            }
+        });
+        return fragmentView;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        confirmBill = getActivity().findViewById(R.id.confirm_bill_upload);
+        confirmBill.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                confirmUploadClicked();
+            }
+        });
+
+        checkIfBillPending();
     }
 
     @Override
@@ -82,12 +116,6 @@ public class MyGroupFragment extends Fragment {
 
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
-
     private void checkMemberToGroup() {
         AlertDialog.Builder addParticipantAlert = new AlertDialog.Builder(getContext());
         addParticipantAlert.setTitle("Enter the phone number to add:");
@@ -101,38 +129,7 @@ public class MyGroupFragment extends Fragment {
         addParticipantAlert.setPositiveButton("Add Participants", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int id) {
-
-                if(!checkIfAlreadyMember(memberNumber.getText().toString())) {
-                    //Search if the phone number is in users table.
-                    //Add to groupMembers if true, else make toast and alert the user
-                    DatabaseReference db = FirebaseDatabase.getInstance().getReference();
-
-                    db.child("User").child(memberNumber.getText().toString()).get().addOnCompleteListener(getActivity(), new OnCompleteListener<DataSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DataSnapshot> task) {
-                            if(task.isSuccessful()) {
-                                try {
-                                    JSONObject currGroupMember = new JSONObject(String.valueOf(task.getResult().getValue()));
-                                    //Send request to person
-                                    sendRequest(currGroupMember.get("phone").toString());
-
-                                } catch (JSONException e) {
-                                    Toast.makeText(getContext(), "No person found. Make sure you have the correct number.",
-                                            Toast.LENGTH_SHORT).show();
-                                    e.printStackTrace();
-                                }
-                            }
-                            else {
-                                Toast.makeText(getContext(), "Cannot connect at this time. Please try again",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-                }
-                else {
-                    Toast.makeText(getContext(), "Member is already in your group!",
-                            Toast.LENGTH_SHORT).show();
-                }
+                addMembers(memberNumber);
             }
         });
 
@@ -144,6 +141,40 @@ public class MyGroupFragment extends Fragment {
 
         AlertDialog alertDialog = addParticipantAlert.create();
         alertDialog.show();
+    }
+
+    private void addMembers(TextView memberNumber) {
+        if(!checkIfAlreadyMember(memberNumber.getText().toString())) {
+            //Search if the phone number is in users table.
+            //Add to groupMembers if true, else make toast and alert the user
+            DatabaseReference db = FirebaseDatabase.getInstance().getReference();
+
+            db.child("User").child(memberNumber.getText().toString()).get().addOnCompleteListener(getActivity(), new OnCompleteListener<DataSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DataSnapshot> task) {
+                    if(task.isSuccessful()) {
+                        try {
+                            JSONObject currGroupMember = new JSONObject(String.valueOf(task.getResult().getValue()));
+                            //Send request to person
+                            sendRequest(currGroupMember.get("phone").toString());
+
+                        } catch (JSONException e) {
+                            Toast.makeText(getContext(), "No person found. Make sure you have the correct number.",
+                                    Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
+                        Toast.makeText(getContext(), "Cannot connect at this time. Please try again",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+        else {
+            Toast.makeText(getContext(), "Member is already in your group!",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void sendRequest(String user) {
@@ -188,8 +219,13 @@ public class MyGroupFragment extends Fragment {
         AlertDialog.Builder alert = new AlertDialog.Builder(getContext());
         alert.setTitle("All Members of " + currGroup.getGroupName() + ":");
         String members = "";
-        for(int i = 0 ; i < currGroup.getParticipants().size(); i++) {
-            members += currGroup.getParticipants().get(i) + "\n";
+        for(int i = 0 ; i < allUsers.size(); i++) {
+            if(i == 0) {
+                members = allUsers.get(i).getfName() + " " + allUsers.get(i).getlName() + "  (Admin)\n";
+            }
+            else {
+                members += allUsers.get(i).getfName() + " " + allUsers.get(i).getlName() + "\n";
+            }
         }
         alert.setMessage(members);
         alert.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
@@ -202,23 +238,27 @@ public class MyGroupFragment extends Fragment {
         alertDialog.show();
     }
 
-    private Group getDataFromBundle(Bundle bundle) {
-        Group newGroup = new Group();
-        String groupData = bundle.getString("currGroup");
-        try {
-
-            JSONObject groupJSON = new JSONObject(String.valueOf(groupData));
-            newGroup = new Group(groupJSON.get("groupId").toString(),
-                    groupJSON.get("adminId").toString(),
-                    new Miscellaneous().replacePercentage(groupJSON.get("groupName").toString()));
-            newGroup.setParticipants(groupJSON.getJSONArray("participants"));
-
-        } catch (JSONException e) {
-            e.printStackTrace();
+    private void getUserNames() {
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference().child("User");
+        for(int i = 0; i < currGroup.getParticipants().size(); i++) {
+            usersRef.child(currGroup.getParticipants().get(i)).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DataSnapshot> task) {
+                    try {
+                        JSONObject thisUser = new JSONObject(String.valueOf(task.getResult().getValue()));
+                        User newUser = new User(thisUser.get("userId").toString(),
+                                thisUser.get("fName").toString(),
+                                thisUser.get("lName").toString(), thisUser.get("email").toString(),
+                                thisUser.get("phone").toString());
+                        allUsers.add(newUser);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
-        Log.d("Group", groupData);
-        return newGroup;
     }
+
 
     private boolean checkIfAlreadyMember(String number) {
         for(int i=0; i < currGroup.getParticipants().size(); i++) {
@@ -227,6 +267,30 @@ public class MyGroupFragment extends Fragment {
             }
         }
         return false;
+    }
+
+    //If there is a
+    private void confirmUploadClicked() {
+        Intent intent = new Intent(getContext(), BillItemsActivity.class);
+        intent.putExtras(this.getArguments());
+        startActivity(intent);
+    }
+
+    //Check if a bill is pending, check approved of latest bill
+    //If pending, take intent directly to next fragment
+    private void checkIfBillPending() {
+        try{
+            currBill = getArguments().getParcelable("currBill");
+        }
+        catch(NullPointerException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if(currBill != null) {
+                //Get all bill items and go to choose bill intent.
+                Log.d("CurrBill", currBill.getBillId());
+            }
+        }
     }
 
 }

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.BillItemsActivity">
+
+    <TextView
+        android:id="@+id/totalTax"
+        android:layout_width="380dp"
+        android:layout_height="25dp"
+        android:layout_marginBottom="11dp"
+        android:text="Tax"
+        android:textAlignment="textEnd"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/upload_bill_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/upload_bill_btn"
+        android:layout_width="383dp"
+        android:layout_height="53dp"
+        android:layout_marginBottom="4dp"
+        android:onClick="saveBill"
+        android:text="Confirm"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/initiali_bills_recyclerView"
+        android:layout_width="390dp"
+        android:layout_height="559dp"
+        android:layout_marginBottom="5dp"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/totalBill"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/totalBill"
+        android:layout_width="380dp"
+        android:layout_height="25dp"
+        android:text="Total"
+        android:textAlignment="textEnd"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/totalTax"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/no_items_bill_text"
+        android:layout_width="387dp"
+        android:layout_height="30dp"
+        android:text="You have no items in current Bill. Try adding some!"
+        android:textAlignment="center"
+        android:textColor="#151515"
+        android:textSize="16sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,4 +1,4 @@
-package com.example.bills;
+package com.example.bills.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.bills.R;
+import com.example.bills.misc.Miscellaneous;
 import com.example.bills.models.*;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -19,8 +21,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import java.lang.reflect.Array;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -68,6 +68,7 @@ public class SignUpActivity extends AppCompatActivity {
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if(task.isSuccessful()) {
                                             setPhoneInDirectoryDb(curr);
+                                            new Miscellaneous().activeUserNumber = currPhone;
                                             Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                                             startActivity(intent);
                                             finish();

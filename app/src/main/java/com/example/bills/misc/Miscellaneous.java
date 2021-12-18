@@ -1,5 +1,6 @@
-package com.example.bills;
+package com.example.bills.misc;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -11,10 +12,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 //For Miscellaneous Functions
 public class Miscellaneous {
+
+    public static String activeUserNumber;
+
     public boolean checkTextFields(String[] fields) {
         for(int i = 0; i < fields.length; i++) {
             if(fields[i].isEmpty()) {
@@ -86,6 +93,24 @@ public class Miscellaneous {
         };
 
         groupRef.addListenerForSingleValueEvent(valueEventListener);
+    }
+
+    //Read Group data from Bundle without bills
+    public Group getGroupDataFromBundle(Bundle bundle) {
+        Group newGroup = new Group();
+        String groupData = bundle.getString("currGroup");
+        try {
+
+            JSONObject groupJSON = new JSONObject(String.valueOf(groupData));
+            newGroup = new Group(groupJSON.get("groupId").toString(),
+                    groupJSON.get("adminId").toString(),
+                    new Miscellaneous().replacePercentage(groupJSON.get("groupName").toString()));
+            newGroup.setParticipants(groupJSON.getJSONArray("participants"));
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return newGroup;
     }
 
 }

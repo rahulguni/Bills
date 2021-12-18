@@ -13,13 +13,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bills">
         <activity
-            android:name=".SignUpActivity"
+            android:name=".activities.BillItemsActivity"
             android:exported="true" />
         <activity
-            android:name=".SignInActivity"
+            android:name=".activities.SignUpActivity"
             android:exported="true" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.SignInActivity"
+            android:exported="true" />
+        <activity
+            android:name=".activities.MainActivity"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>

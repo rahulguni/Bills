@@ -11,38 +11,30 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.bills.GroupCustomAdapter;
-import com.example.bills.MainActivity;
-import com.example.bills.Miscellaneous;
+import com.example.bills.adapters.GroupCustomAdapter;
+import com.example.bills.misc.Miscellaneous;
 import com.example.bills.R;
 import com.example.bills.databinding.FragmentHomeBinding;
+import com.example.bills.models.Bill;
 import com.example.bills.models.Group;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,6 +49,7 @@ public class HomeFragment extends Fragment implements GroupCustomAdapter.OnGroup
     private RecyclerView recyclerView;
     private Boolean hideAddGroupBtn = false;
     private String currUserPhone;
+    private Bill mostRecentBill;
 
     //check user active groups
     private ArrayList<Group> currGroups;
@@ -125,6 +118,7 @@ public class HomeFragment extends Fragment implements GroupCustomAdapter.OnGroup
                 else {
                     String phone = String.valueOf(task.getResult().getValue());
                     currUserPhone = phone;
+                    misc.activeUserNumber = phone;
                     checkGroups(phone);
                 }
             }
@@ -221,37 +215,7 @@ public class HomeFragment extends Fragment implements GroupCustomAdapter.OnGroup
 
         addGroupAlert.setPositiveButton("Make Group", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                //Make a new group with currUser as admin
-                DatabaseReference groupDatabase;
-                groupDatabase = FirebaseDatabase.getInstance().getReference();
-
-                //create groupId
-                String groupId = groupDatabase.push().getKey();
-                Group newGroup = new Group( groupId,
-                        mAuth.getCurrentUser().getUid(),
-                        misc.replaceWhiteSpace(groupName.getText().toString().trim()));
-                groupDatabase.child("Group").child(groupId).setValue(newGroup).addOnCompleteListener(getActivity(), new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if(task.isSuccessful()) {
-                            Toast.makeText(getContext(), "Congratulations on making a new group! Start dividing bills now.",
-                                    Toast.LENGTH_SHORT).show();
-                            misc.addCurrGroupToUser(currUserPhone, groupId);
-                            misc.addCurrUserToGroup(groupId, currUserPhone);
-                            //Add group to the recyclerview
-                            Group newGroup = new Group(groupId, mAuth.getCurrentUser().getUid(), groupName.getText().toString());
-                            newGroup.setParticipantsForInitial(currUserPhone);
-                            currGroups.add(0, newGroup);
-                            fixUI(true);
-                            adapter.notifyDataSetChanged();
-                        }
-                        else {
-                            Toast.makeText(getContext(), "Cannot Make Group. Please try again.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-
+                addGroup(groupName);
             }
         });
 
@@ -265,18 +229,79 @@ public class HomeFragment extends Fragment implements GroupCustomAdapter.OnGroup
         alertDialog.show();
     }
 
+    private void addGroup(TextView groupName) {
+        //Make a new group with currUser as admin
+        DatabaseReference groupDatabase;
+        groupDatabase = FirebaseDatabase.getInstance().getReference();
+
+        //create groupId
+        String groupId = groupDatabase.push().getKey();
+        Group newGroup = new Group( groupId,
+                mAuth.getCurrentUser().getUid(),
+                misc.replaceWhiteSpace(groupName.getText().toString().trim()));
+        groupDatabase.child("Group").child(groupId).setValue(newGroup).addOnCompleteListener(getActivity(), new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()) {
+                    Toast.makeText(getContext(), "Congratulations on making a new group! Start dividing bills now.",
+                            Toast.LENGTH_SHORT).show();
+                    misc.addCurrGroupToUser(currUserPhone, groupId);
+                    misc.addCurrUserToGroup(groupId, currUserPhone);
+                    //Add group to the recyclerview
+                    Group newGroup = new Group(groupId, mAuth.getCurrentUser().getUid(), groupName.getText().toString());
+                    newGroup.setParticipantsForInitial(currUserPhone);
+                    currGroups.add(0, newGroup);
+                    fixUI(true);
+                    adapter.notifyDataSetChanged();
+                }
+                else {
+                    Toast.makeText(getContext(), "Cannot Make Group. Please try again.",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
     @Override
     public void onGroupClick(int position) {
         MyGroupFragment myGroupFragment = new MyGroupFragment();
         this.hideAddGroupBtn = true;
 
-        //Make a bundle of current group data to next fragment
-        Bundle bundle = new Bundle();
-        bundle.putString("currGroup", currGroups.get(position).toString());
-        myGroupFragment.setArguments(bundle);
-        getActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.home_fragment_id, myGroupFragment)
-                .commit();
+        //Find the latest Bill
+        DatabaseReference billsDb = FirebaseDatabase.getInstance().getReference().child("Group").child(currGroups.get(position).getGroupId());
+        billsDb.child("Bills").orderByKey().limitToLast(1).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if(task.isSuccessful()) {
+                    try {
+                        JSONObject billsJSON = new JSONObject(String.valueOf(task.getResult().getValue()));
+                        //Get current Bill id
+                        String billId = billsJSON.keys().next();
+                        JSONObject currBillJSON = new JSONObject(billsJSON.get(billId).toString());
+                        mostRecentBill = new Bill(currBillJSON.get("billId").toString(),
+                                new Double(currBillJSON.get("totalPrice").toString()),
+                                new Double(currBillJSON.get("tax").toString()),
+                                new Boolean(currBillJSON.get("approved").toString()), new ArrayList<>());
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    finally {
+                        //Make a bundle of current group data to next fragment
+                        Bundle bundle = new Bundle();
+                        bundle.putString("currGroup", currGroups.get(position).toString());
+                        if(mostRecentBill != null && !mostRecentBill.isApproved()) {
+                            bundle.putParcelable("currBill", mostRecentBill);
+                        }
+                        myGroupFragment.setArguments(bundle);
+                        getActivity().getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.home_fragment_id, myGroupFragment)
+                                .commit();
+                    }
+                }
+            }
+        });
+
     }
 
     @Override
