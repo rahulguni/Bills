@@ -31,6 +31,8 @@ public class Bill implements Parcelable {
         approved = in.readByte() != 0;
         tax = in.readDouble();
         timestamp = in.readLong();
+        allItems = new ArrayList<>();
+        in.readTypedList(allItems, BillItem.CREATOR);
     }
 
     public static final Creator<Bill> CREATOR = new Creator<Bill>() {
@@ -102,9 +104,21 @@ public class Bill implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(this.billId);
         parcel.writeDouble(this.totalPrice);
-        parcel.writeDouble(this.tax);
         parcel.writeByte((byte) (this.approved ? 1 : 0));
-        parcel.writeDouble(this.timestamp);
-        parcel.writeArray(this.allItems.toArray());
+        parcel.writeDouble(this.tax);
+        parcel.writeLong(this.timestamp);
+        parcel.writeTypedList(this.allItems);
+    }
+
+    @Override
+    public String toString() {
+        return "Bill{" +
+                "billId='" + billId + '\'' +
+                ", totalPrice=" + totalPrice +
+                ", approved=" + approved +
+                ", tax=" + tax +
+                ", timestamp=" + timestamp +
+                ", allItems=" + allItems +
+                '}';
     }
 }

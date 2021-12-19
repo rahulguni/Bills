@@ -3,6 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/background_selector.xml" value="0.2520833333333333" />
+        <entry key="app/src/main/res/drawable/ic_dashboard_black_24dp.xml" value="0.2557291666666667" />
+        <entry key="app/src/main/res/drawable/ic_finalize.xml" value="0.2557291666666667" />
+        <entry key="app/src/main/res/drawable/ic_home_black_24dp.xml" value="0.2557291666666667" />
+        <entry key="app/src/main/res/drawable/line_divider.xml" value="0.2520833333333333" />
         <entry key="app/src/main/res/layout-w1240dp/activity_login.xml" value="0.2714190093708166" />
         <entry key="app/src/main/res/layout-w936dp/activity_login.xml" value="0.316796875" />
         <entry key="app/src/main/res/layout/activity_add_group.xml" value="0.42239583333333336" />
@@ -12,6 +17,7 @@
         <entry key="app/src/main/res/layout/activity_sign_up.xml" value="0.42239583333333336" />
         <entry key="app/src/main/res/layout/add_billitem_dialog.xml" value="0.42239583333333336" />
         <entry key="app/src/main/res/layout/billitem_recyclerview_adapter.xml" value="0.42239583333333336" />
+        <entry key="app/src/main/res/layout/fragment_current_bill.xml" value="0.42239583333333336" />
         <entry key="app/src/main/res/layout/fragment_dashboard.xml" value="0.42239583333333336" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.42239583333333336" />
         <entry key="app/src/main/res/layout/fragment_my_group.xml" value="0.335" />

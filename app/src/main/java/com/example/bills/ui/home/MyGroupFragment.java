@@ -29,6 +29,7 @@ import com.example.bills.misc.Miscellaneous;
 import com.example.bills.R;
 import com.example.bills.databinding.FragmentHomeBinding;
 import com.example.bills.models.Bill;
+import com.example.bills.models.BillItem;
 import com.example.bills.models.Group;
 import com.example.bills.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,10 +40,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MyGroupFragment extends Fragment {
 
@@ -271,9 +274,18 @@ public class MyGroupFragment extends Fragment {
 
     //If there is a
     private void confirmUploadClicked() {
-        Intent intent = new Intent(getContext(), BillItemsActivity.class);
-        intent.putExtras(this.getArguments());
-        startActivity(intent);
+        //check if current user is admin to start a new bill
+        if(misc.activeUserNumber.equals(currGroup.getParticipants().get(0))) {
+            Intent intent = new Intent(getContext(), BillItemsActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("currGroupID", currGroup.getGroupId());
+            intent.putExtras(bundle);
+            startActivity(intent);
+        }
+        else {
+            Toast.makeText(getContext(), "Only group admins can start a new bill!",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     //Check if a bill is pending, check approved of latest bill
@@ -288,9 +300,55 @@ public class MyGroupFragment extends Fragment {
         finally {
             if(currBill != null) {
                 //Get all bill items and go to choose bill intent.
-                Log.d("CurrBill", currBill.getBillId());
+                getAllBillItems();
             }
         }
+    }
+
+    private void getAllBillItems(){
+        DatabaseReference billItems = FirebaseDatabase.getInstance().getReference().child("Group")
+                .child(currGroup.getGroupId()).child("Bills").child(currBill.getBillId()).child("allItems");
+        billItems.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                try {
+                    ArrayList<BillItem> tempBillItems = new ArrayList<>();
+                    JSONArray billItemsJSON = new JSONArray(String.valueOf(task.getResult().getValue()));
+                    //loop through the items and bundle them up for next intent
+                    for(int i = 0; i < billItemsJSON.length(); i++) {
+                        JSONObject currBillItemJSON = new JSONObject(String.valueOf(billItemsJSON.get(i)));
+                        BillItem newBillItem = new BillItem(String.valueOf(currBillItemJSON.get("billItemId")),
+                                misc.replacePercentage(String.valueOf(currBillItemJSON.get("itemName"))),
+                                new Double(String.valueOf(currBillItemJSON.get("itemPrice"))),
+                                new Integer(String.valueOf(currBillItemJSON.get("itemQuantity"))));
+                        JSONArray usersList = new JSONArray();
+                        try {
+                            usersList = new JSONArray(currBillItemJSON.getJSONArray("Users"));
+                        }
+                        catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        if(usersList.length() > 0) {
+                            ArrayList<String> allUsersList = new ArrayList<>();
+                            for(int j = 0; j < usersList.length(); j++) {
+                                allUsersList.add(usersList.get(i).toString());
+                            }
+                            newBillItem.setUsers(allUsersList);
+                        }
+                        tempBillItems.add(newBillItem);
+                    }
+                    currBill.setAllItems(tempBillItems);
+                    Intent intent = new Intent(getContext(), BillItemsActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("currGroupID", currGroup.getGroupId());
+                    bundle.putParcelable("currActiveBill", currBill);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
 }

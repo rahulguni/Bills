@@ -64,4 +64,29 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/view_user_items"
+        android:layout_width="180dp"
+        android:layout_height="53dp"
+        android:layout_marginTop="8dp"
+        android:onClick="viewCurrUserItems"
+        android:text="View Items"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toStartOf="@+id/add_item_to_user"
+        app:layout_constraintHorizontal_bias="0.28"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/totalTax" />
+
+    <Button
+        android:id="@+id/add_item_to_user"
+        android:layout_width="174dp"
+        android:layout_height="53dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="10dp"
+        android:onClick="addCurrItem"
+        android:text="Add Item"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/totalTax" />
 </androidx.constraintlayout.widget.ConstraintLayout>

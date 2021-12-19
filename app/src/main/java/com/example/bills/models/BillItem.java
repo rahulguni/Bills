@@ -1,8 +1,11 @@
 package com.example.bills.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 
-public class BillItem {
+public class BillItem implements Parcelable {
     private String billItemId;
     private String itemName;
     private double itemPrice;
@@ -16,6 +19,26 @@ public class BillItem {
         this.itemQuantity = itemQuantity;
         this.users = new ArrayList<>();
     }
+
+    protected BillItem(Parcel in) {
+        billItemId = in.readString();
+        itemName = in.readString();
+        itemPrice = in.readDouble();
+        itemQuantity = in.readInt();
+        users = in.createStringArrayList();
+    }
+
+    public static final Creator<BillItem> CREATOR = new Creator<BillItem>() {
+        @Override
+        public BillItem createFromParcel(Parcel in) {
+            return new BillItem(in);
+        }
+
+        @Override
+        public BillItem[] newArray(int size) {
+            return new BillItem[size];
+        }
+    };
 
     public String getBillItemId() {
         return billItemId;
@@ -57,4 +80,28 @@ public class BillItem {
         this.itemName = itemName;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(billItemId);
+        parcel.writeString(itemName);
+        parcel.writeDouble(itemPrice);
+        parcel.writeInt(itemQuantity);
+        parcel.writeStringList(users);
+    }
+
+    @Override
+    public String toString() {
+        return "BillItem{" +
+                "billItemId='" + billItemId + '\'' +
+                ", itemName='" + itemName + '\'' +
+                ", itemPrice=" + itemPrice +
+                ", itemQuantity=" + itemQuantity +
+                ", users=" + users +
+                '}';
+    }
 }
