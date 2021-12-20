@@ -39,4 +39,13 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(mAuth.getCurrentUser() == null) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            startActivity(intent);
+        }
+    }
 }

@@ -429,7 +429,7 @@ public class BillItemsActivity extends AppCompatActivity implements BillItemCust
 
     private boolean isAdmin() {
         String adminId = getIntent().getExtras().getString("groupAdminNumber");
-        if(misc.activeUserNumber.equals(adminId)) {
+        if (misc.activeUserNumber.equals(adminId)) {
             return true;
         }
         return false;

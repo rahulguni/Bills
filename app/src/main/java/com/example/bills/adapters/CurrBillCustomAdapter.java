@@ -37,6 +37,7 @@ public class CurrBillCustomAdapter extends RecyclerView.Adapter<CurrBillCustomAd
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewHolder holder, int position) {
         holder.userName.setText(allUsers.get(holder.getAdapterPosition()).getfName() + " " + allUsers.get(holder.getAdapterPosition()).getlName());
+        holder.totalPrice.setText("$" + allUsers.get(holder.getAdapterPosition()).getMoney());
     }
 
     @Override
