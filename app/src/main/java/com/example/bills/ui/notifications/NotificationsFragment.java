@@ -239,6 +239,12 @@ public class NotificationsFragment extends Fragment implements GroupCustomAdapte
                 }
                 userReference.setValue(currRequests);
                 adapter.notifyDataSetChanged();
+                if(allRequests.size() == 0) {
+                    noRequestsText.setVisibility(View.VISIBLE);
+                }
+                else {
+                    noRequestsText.setVisibility(View.INVISIBLE);
+                }
             }
 
             @Override

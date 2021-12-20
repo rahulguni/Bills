@@ -2,6 +2,7 @@ package com.example.bills.ui.home;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -22,6 +23,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.bills.activities.SignInActivity;
 import com.example.bills.adapters.GroupCustomAdapter;
 import com.example.bills.misc.Miscellaneous;
 import com.example.bills.R;
@@ -109,20 +111,28 @@ public class HomeFragment extends Fragment implements GroupCustomAdapter.OnGroup
 
     private void checkProfile() {
         DatabaseReference userDatabase = FirebaseDatabase.getInstance().getReference();
-        userDatabase.child("UserDirectory").child(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if(!task.isSuccessful()) {
-                    Log.e("firebase", "Error getting data", task.getException());
+        try {
+            userDatabase.child("UserDirectory").child(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DataSnapshot> task) {
+                    if(!task.isSuccessful()) {
+                        Log.e("firebase", "Error getting data", task.getException());
+                    }
+                    else {
+                        String phone = String.valueOf(task.getResult().getValue());
+                        currUserPhone = phone;
+                        misc.activeUserNumber = phone;
+                        checkGroups(phone);
+                    }
                 }
-                else {
-                    String phone = String.valueOf(task.getResult().getValue());
-                    currUserPhone = phone;
-                    misc.activeUserNumber = phone;
-                    checkGroups(phone);
-                }
-            }
-        });
+            });
+        }
+        catch (NullPointerException e) {
+            //No user signed in, bring popup menu to sign in the user
+            Intent intent = new Intent(getContext(), SignInActivity.class);
+            startActivity(intent);
+        }
+
     }
 
 

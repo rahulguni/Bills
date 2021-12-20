@@ -13,6 +13,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bills">
         <activity
+            android:name=".activities.CurrBillActivity"
+            android:exported="true" />
+        <activity
+            android:name=".activities.AllBillsActivity"
+            android:exported="true" />
+        <activity
             android:name=".activities.BillItemsActivity"
             android:exported="true" />
         <activity

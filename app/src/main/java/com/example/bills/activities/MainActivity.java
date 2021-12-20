@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mAuth = FirebaseAuth.getInstance();
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -38,23 +38,5 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
-        mAuth = FirebaseAuth.getInstance();
     }
-
-    //check if user is currently signed in, else go to sign in/sign up view
-    @Override
-    protected void onStart() {
-        super.onStart();
-        try {
-            FirebaseUser currUser = mAuth.getCurrentUser();
-            Log.d("user", currUser.getEmail());
-        }
-        catch(NullPointerException e) {
-            //No user signed in, bring popup menu to sign in the user
-            Intent intent = new Intent(this, SignInActivity.class);
-            startActivity(intent);
-        }
-    }
-
-
 }

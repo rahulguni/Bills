@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/group_Fragment_id"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#8F7878"
@@ -9,34 +10,30 @@
 
     <Button
         android:id="@+id/confirm_bill_upload"
-        android:layout_width="215dp"
-        android:layout_height="53dp"
-        android:layout_marginStart="98dp"
-        android:layout_marginTop="7dp"
-        android:layout_marginEnd="98dp"
-        android:text="Confirm"
+        android:layout_width="258dp"
+        android:layout_height="91dp"
+        android:layout_marginStart="76dp"
+        android:layout_marginTop="249dp"
+        android:layout_marginEnd="77dp"
+        android:layout_marginBottom="14dp"
+        android:text="Start New Bill"
+        app:layout_constraintBottom_toTopOf="@+id/view_bills"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bill_image" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/view_bills"
-        android:layout_width="215dp"
-        android:layout_height="53dp"
-        android:layout_marginStart="98dp"
-        android:layout_marginEnd="98dp"
+        android:layout_width="258dp"
+        android:layout_height="91dp"
+        android:layout_marginStart="76dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="77dp"
+        android:layout_marginBottom="286dp"
         android:text="View All Bills"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/confirm_bill_upload" />
 
-    <ImageView
-        android:id="@+id/bill_image"
-        android:layout_width="345dp"
-        android:layout_height="452dp"
-        android:contentDescription="TODO"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:src="@tools:sample/avatars" />
 </androidx.constraintlayout.widget.ConstraintLayout>

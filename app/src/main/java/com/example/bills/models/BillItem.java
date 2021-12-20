@@ -20,6 +20,10 @@ public class BillItem implements Parcelable {
         this.users = new ArrayList<>();
     }
 
+    public BillItem() {
+
+    }
+
     protected BillItem(Parcel in) {
         billItemId = in.readString();
         itemName = in.readString();
@@ -70,6 +74,12 @@ public class BillItem implements Parcelable {
 
     public void setUsers(ArrayList<String> users) {
         this.users = users;
+    }
+
+    public void addNewUsers(ArrayList<String> newUsers) {
+        for(String user: newUsers) {
+            this.users.add(user);
+        }
     }
 
     public String getItemName() {

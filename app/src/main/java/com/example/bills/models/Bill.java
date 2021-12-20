@@ -23,6 +23,15 @@ public class Bill implements Parcelable {
         this.timestamp = System.currentTimeMillis()/1000;
     }
 
+    public Bill(String billId, double totalPrice, double tax, boolean approved, long timestamp) {
+        this.billId = billId;
+        this.totalPrice = totalPrice;
+        this.tax = tax;
+        this.approved = approved;
+        this.allItems = new ArrayList<>();
+        this.timestamp = timestamp;
+    }
+
     public Bill(){};
 
     protected Bill(Parcel in) {

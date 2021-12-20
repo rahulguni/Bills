@@ -11,12 +11,18 @@
         <entry key="app/src/main/res/layout-w1240dp/activity_login.xml" value="0.2714190093708166" />
         <entry key="app/src/main/res/layout-w936dp/activity_login.xml" value="0.316796875" />
         <entry key="app/src/main/res/layout/activity_add_group.xml" value="0.42239583333333336" />
+        <entry key="app/src/main/res/layout/activity_all_bills.xml" value="0.375" />
         <entry key="app/src/main/res/layout/activity_bill_items.xml" value="0.42239583333333336" />
+        <entry key="app/src/main/res/layout/activity_curr_bill.xml" value="0.4083333333333333" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.42239583333333336" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.375" />
         <entry key="app/src/main/res/layout/activity_sign_up.xml" value="0.42239583333333336" />
         <entry key="app/src/main/res/layout/add_billitem_dialog.xml" value="0.42239583333333336" />
+        <entry key="app/src/main/res/layout/add_billitem_quantity_dialog.xml" value="0.375" />
+        <entry key="app/src/main/res/layout/all_bills_recyclerview_adapter.xml" value="0.42239583333333336" />
         <entry key="app/src/main/res/layout/billitem_recyclerview_adapter.xml" value="0.42239583333333336" />
+        <entry key="app/src/main/res/layout/curr_bill_recyclerview_adapter.xml" value="0.42239583333333336" />
+        <entry key="app/src/main/res/layout/fragment_all_bills.xml" value="0.42239583333333336" />
         <entry key="app/src/main/res/layout/fragment_current_bill.xml" value="0.42239583333333336" />
         <entry key="app/src/main/res/layout/fragment_dashboard.xml" value="0.42239583333333336" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.42239583333333336" />

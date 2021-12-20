@@ -6,6 +6,7 @@ public class User {
     private String lName;
     private String email;
     private String phone;
+    private Double money;
 
     public User(String userId, String fName, String lName, String email, String phone) {
         this.userId = userId;
@@ -55,5 +56,11 @@ public class User {
         this.phone = phone;
     }
 
+    public Double getMoney() {
+        return money;
+    }
 
+    public void setMoney(Double money) {
+        this.money = money;
+    }
 }

@@ -24,10 +24,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.bills.activities.AllBillsActivity;
 import com.example.bills.activities.BillItemsActivity;
 import com.example.bills.misc.Miscellaneous;
 import com.example.bills.R;
-import com.example.bills.databinding.FragmentHomeBinding;
 import com.example.bills.models.Bill;
 import com.example.bills.models.BillItem;
 import com.example.bills.models.Group;
@@ -45,15 +45,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MyGroupFragment extends Fragment {
 
-    private FragmentHomeBinding binding;
     private Bill currBill;
     private Group currGroup;
     private ArrayList<User> allUsers = new ArrayList<>();
-    Button confirmBill;
+    Button confirmBill, viewAllBills;
     Miscellaneous misc = new Miscellaneous();
 
     @Override
@@ -89,6 +87,13 @@ public class MyGroupFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 confirmUploadClicked();
+            }
+        });
+        viewAllBills = getActivity().findViewById(R.id.view_bills);
+        viewAllBills.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewGroupAllBills();
             }
         });
 
@@ -321,19 +326,19 @@ public class MyGroupFragment extends Fragment {
                                 misc.replacePercentage(String.valueOf(currBillItemJSON.get("itemName"))),
                                 new Double(String.valueOf(currBillItemJSON.get("itemPrice"))),
                                 new Integer(String.valueOf(currBillItemJSON.get("itemQuantity"))));
-                        JSONArray usersList = new JSONArray();
+                        JSONArray usersList;
                         try {
-                            usersList = new JSONArray(currBillItemJSON.getJSONArray("Users"));
+                            usersList = new JSONArray(currBillItemJSON.getJSONArray("users").toString());
+                            if(usersList.length() > 0) {
+                                ArrayList<String> allUsersList = new ArrayList<>();
+                                for(int j = 0; j < usersList.length(); j++) {
+                                    allUsersList.add(usersList.get(j).toString());
+                                }
+                                newBillItem.setUsers(allUsersList);
+                            }
                         }
                         catch (JSONException e) {
                             e.printStackTrace();
-                        }
-                        if(usersList.length() > 0) {
-                            ArrayList<String> allUsersList = new ArrayList<>();
-                            for(int j = 0; j < usersList.length(); j++) {
-                                allUsersList.add(usersList.get(i).toString());
-                            }
-                            newBillItem.setUsers(allUsersList);
                         }
                         tempBillItems.add(newBillItem);
                     }
@@ -341,6 +346,7 @@ public class MyGroupFragment extends Fragment {
                     Intent intent = new Intent(getContext(), BillItemsActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putString("currGroupID", currGroup.getGroupId());
+                    bundle.putString("groupAdminNumber", currGroup.getParticipants().get(0));
                     bundle.putParcelable("currActiveBill", currBill);
                     intent.putExtras(bundle);
                     startActivity(intent);
@@ -350,5 +356,38 @@ public class MyGroupFragment extends Fragment {
             }
         });
     }
+
+    private void viewGroupAllBills() {
+        Intent intent = new Intent(getContext(), AllBillsActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("currGroupId", currGroup.getGroupId());
+        bundle.putStringArrayList("allGroupMembers", currGroup.getParticipants());
+        ArrayList<String> allBillIds = new ArrayList<>();
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Group")
+                .child(currGroup.getGroupId()).child("Bills");
+
+        databaseReference.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                try {
+                    JSONObject allBills = new JSONObject(task.getResult().getValue().toString());
+                    while(allBills.keys().hasNext()) {
+                        allBillIds.add(allBills.keys().next());
+                        allBills.remove(allBills.keys().next());
+                    }
+                    bundle.putStringArrayList("allBillIds", allBillIds);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException e) {
+                    Toast.makeText(getContext(), "Your group is new. you have no bills!",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+    }
+
 
 }
